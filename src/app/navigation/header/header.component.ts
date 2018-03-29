@@ -1,19 +1,23 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
 
-    @Output() sidenavToggle = new EventEmitter<void>();
-  constructor() { }
+    // using Output() making this event emitter listenable from outside.
 
-  ngOnInit() {
-  }
+    @Output() sidenavToggle = new EventEmitter<void>();
+
+    constructor() {
+    }
+
+    ngOnInit() {
+    }
 
     onToggleSideNav() {
-
+        this.sidenavToggle.emit();
     }
 }

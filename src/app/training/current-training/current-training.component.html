@@ -1,3 +1,25 @@
-<p>
-  current-training works!
-</p>
+<section class="current-training"
+         fxLayout="column"
+         fxLayoutAlign="center center">
+    <mat-progress-spinner
+            [value]="progress"
+            mode="determinate"
+            value="90%">
+
+    </mat-progress-spinner>
+    <h1>{{ progress }} %</h1>
+
+    <h1> Keep on Going, You can do it!</h1>
+    <h1> No pain No gain!</h1>
+    <div class="container"
+         fxLayout="row"
+         fxLayoutGap="10px"
+         fxLayoutAlign="center center">
+<button mat-raised-button color="accent" (click)="onStop()">Stop</button>
+    <br>
+<button mat-raised-button color="accent" (click)="onReset()">Reset</button>
+    <br>
+<button mat-raised-button color="accent" (click)="onRestart()" *ngIf="restart">Start</button>
+    </div>
+
+</section>
