@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { StopTrainingComponent } from './stop-training.component';
 
@@ -8,6 +8,7 @@ import { StopTrainingComponent } from './stop-training.component';
     styleUrls: ['./current-training.component.css']
 })
 export class CurrentTrainingComponent implements OnInit {
+    @Output() trainingExit = new EventEmitter();
     restart = false;
     progress = 0;
     timer: number;
@@ -16,20 +17,27 @@ export class CurrentTrainingComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.timer = setInterval(() => {
-
-            this.progress = this.progress + 5;
-            if (this.progress >= 100) {
-                clearInterval(this.timer);
-            }
-        }, 1000);
-         this.restart = false;
+        this.startOrResume();
     }
 
     onStop() {
         clearInterval(this.timer);
-        this.dialog.open(StopTrainingComponent);
-        this.restart = true;
+        const dialogRef = this.dialog.open(StopTrainingComponent, {
+            data: { progress: this.progress
+            }
+        });
+
+        // dialogRef.afterClosed().subscribe((result) => {console.log(result)});
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.trainingExit.emit();
+            }
+            else{
+                this.startOrResume();
+            }
+            // this.restart = true;
+        });
     }
 
     onReset() {
@@ -39,6 +47,10 @@ export class CurrentTrainingComponent implements OnInit {
     }
 
     onRestart() {
+        this.startOrResume();
+    }
+
+    startOrResume() {
         this.timer = setInterval(() => {
             this.progress = this.progress + 5;
             if (this.progress >= 100) {
@@ -47,6 +59,5 @@ export class CurrentTrainingComponent implements OnInit {
         }, 1000);
         this.restart = false;
     }
-
 
 }
