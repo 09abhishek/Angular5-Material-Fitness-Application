@@ -1,6 +1,7 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { StopTrainingComponent } from './stop-training.component';
+import { TrainingService } from '../training.service';
 
 @Component({
     selector: 'app-current-training',
@@ -8,12 +9,14 @@ import { StopTrainingComponent } from './stop-training.component';
     styleUrls: ['./current-training.component.css']
 })
 export class CurrentTrainingComponent implements OnInit {
-    @Output() trainingExit = new EventEmitter();
+
     restart = false;
     progress = 0;
     timer: number;
+    exerciseName: string;
 
-    constructor(private dialog: MatDialog) {
+    // Injecting mat-Dialog component here to use .open to display the dialogbox stop the service
+    constructor(private dialog: MatDialog, private trainingService: TrainingService) {
     }
 
     ngOnInit() {
@@ -23,17 +26,16 @@ export class CurrentTrainingComponent implements OnInit {
     onStop() {
         clearInterval(this.timer);
         const dialogRef = this.dialog.open(StopTrainingComponent, {
-            data: { progress: this.progress
-            }
+            data: { progress: this.progress }
         });
 
         // dialogRef.afterClosed().subscribe((result) => {console.log(result)});
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                this.trainingExit.emit();
+                this.trainingService.cancelExercise(this.progress);
             }
-            else{
+            else {
                 this.startOrResume();
             }
             // this.restart = true;
@@ -50,13 +52,18 @@ export class CurrentTrainingComponent implements OnInit {
         this.startOrResume();
     }
 
+    // step is basically what would be the duration to update the spinner.
     startOrResume() {
+        const step = this.trainingService.getRunningExercise().duration / 100 * 1000;
+        console.log(this.trainingService.getRunningExercise());
+        this.exerciseName = this.trainingService.getRunningExercise().name;
         this.timer = setInterval(() => {
-            this.progress = this.progress + 5;
+            this.progress = this.progress + 1;
             if (this.progress >= 100) {
+                this.trainingService.completeExercise();
                 clearInterval(this.timer);
             }
-        }, 1000);
+        }, step);
         this.restart = false;
     }
 
