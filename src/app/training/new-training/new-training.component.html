@@ -14,8 +14,8 @@
                             required
                 >
 
-                    <mat-option *ngFor="let temp of exercises"
-                                [value]="temp.id">
+                    <mat-option *ngFor="let temp of exercises | async"
+                                [value]="temp.name">
                         {{ temp.name }}
                     </mat-option>
 
