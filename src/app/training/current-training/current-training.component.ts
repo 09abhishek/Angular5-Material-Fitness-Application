@@ -23,6 +23,21 @@ export class CurrentTrainingComponent implements OnInit {
         this.startOrResume();
     }
 
+    startOrResume() {
+        // step is basically what would be the duration to update the spinner.
+        const step = this.trainingService.getRunningExercise().duration / 100 * 1000;
+
+        this.exerciseName = this.trainingService.getRunningExercise().name;
+        this.timer = setInterval(() => {
+            this.progress = this.progress + 1;
+            if (this.progress >= 100) {
+                this.trainingService.completeExercise();
+                clearInterval(this.timer);
+            }
+        }, step);
+        this.restart = false;
+    }
+
     onStop() {
         clearInterval(this.timer);
         const dialogRef = this.dialog.open(StopTrainingComponent, {
@@ -50,21 +65,6 @@ export class CurrentTrainingComponent implements OnInit {
 
     onRestart() {
         this.startOrResume();
-    }
-
-    // step is basically what would be the duration to update the spinner.
-    startOrResume() {
-        const step = this.trainingService.getRunningExercise().duration / 100 * 1000;
-        console.log(this.trainingService.getRunningExercise());
-        this.exerciseName = this.trainingService.getRunningExercise().name;
-        this.timer = setInterval(() => {
-            this.progress = this.progress + 1;
-            if (this.progress >= 100) {
-                this.trainingService.completeExercise();
-                clearInterval(this.timer);
-            }
-        }, step);
-        this.restart = false;
     }
 
 }

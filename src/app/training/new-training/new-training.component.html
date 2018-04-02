@@ -11,10 +11,9 @@
                 <mat-select placeholder="Select the exercise"
                             ngModel
                             name="exercise"
-                            required
-                >
+                            required>
 
-                    <mat-option *ngFor="let temp of exercises | async"
+                    <mat-option *ngFor="let temp of exercises "
                                 [value]="temp.name">
                         {{ temp.name }}
                     </mat-option>
