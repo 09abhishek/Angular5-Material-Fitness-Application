@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
 
 import { Exercise } from './exercise.model';
-import { Subscription } from 'rxjs/Subscription';
+import { UIService } from '../shared/ui.service';
 
 
 @Injectable()
@@ -16,7 +17,8 @@ export class TrainingService {
     private runningExercise: Exercise;
     private fbSubs: Subscription [] = [];
 
-    constructor(private db: AngularFirestore) {
+    constructor(private db: AngularFirestore,
+                private uiService: UIService) {
     }
 
     // store the user selects for the exercise!
@@ -25,10 +27,12 @@ export class TrainingService {
     // it will retrun a copy of array ... not affecting the original one.
 
     fetchAvailableExercises() {
-       this.fbSubs.push( this.db
+        this.uiService.loadingStateChanged.next(true);
+        this.fbSubs.push(this.db
             .collection('availableExercises')
             .snapshotChanges()
             .map(docArray => {
+                // throw(new Error());
                 return docArray.map(doc => {
                     return {
                         id: doc.payload.doc.id,
@@ -39,12 +43,18 @@ export class TrainingService {
                 });
             })
             .subscribe((exercises: Exercise[]) => {
+                this.uiService.loadingStateChanged.next(false);
                 this.availableExercises = exercises;
-                console.log(...exercises);
                 this.exercisesChanged.next([...this.availableExercises]);
-
+            }, error => {
+                this.uiService.loadingStateChanged.next(false);
+                this.uiService.showSnackbar('Fetching Exercises failed, please try again later', null, 3000);
+                this.exercisesChanged.next(null);
             }));
     }
+
+
+
 
     startExercise(selectedId: string) {
         // this.db.doc('availableExercise/' + selectedId).update({lastSelected: new Date()});
@@ -52,10 +62,9 @@ export class TrainingService {
 
         this.runningExercise = this.availableExercises
             .find(elementfromavailableExercises =>
-            elementfromavailableExercises.name === selectedId);
+            elementfromavailableExercises.id === selectedId);
 
         this.exerciseChanged.next({ ...this.runningExercise });
-        this.db.doc('availableExercises/' + this.runningExercise.id).update({ lastSelected: new Date() });
     }
 
     completeExercise() {
@@ -98,7 +107,7 @@ export class TrainingService {
             }));
     }
 
-    cancelSubscriptions(){
+    cancelSubscriptions() {
         this.fbSubs.forEach(subs => subs.unsubscribe());
     }
 
